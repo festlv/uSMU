@@ -33,7 +33,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 #define ADS1115_ADDRESS 0x48 // I2C addresses of ADC and DAC
-#define DAC8571_ADDRESS 0x76
+#define DAC8571_ADDRESS 0x4C
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -253,7 +253,7 @@ void adc(uint8_t channel)
 	char adcmsg[16];
 	memset(adcmsg, 0, sizeof(adcmsg));
 	sprintf(adcmsg, "%d", adc);
-	CDC_Transmit_FS(adcmsg, sizeof(adcmsg));
+	CDC_Transmit_FS(adcmsg, strlen(adcmsg));
 }
 
 void single_shot()
@@ -326,7 +326,7 @@ void single_shot()
 	strcat(vmsg, imsg);
 
 	strcat(vmsg, "\n");
-	CDC_Transmit_FS(vmsg, sizeof(vmsg));
+	CDC_Transmit_FS(vmsg, strlen(vmsg));
 
 }
 
@@ -642,8 +642,13 @@ int main(void)
 			else if (setMeasVoltagePtr != NULL)
 			{
 				strtok(chRxBuffer, " ");
-				float requested_voltage = atof(strtok(NULL, " "));
-				dac_write_voltage(requested_voltage);
+				char* endptr;
+				char* startptr = strtok(NULL, " ");
+				if (startptr != NULL) {
+					float requested_voltage = strtod(startptr, endptr);
+					if (endptr != startptr)
+						dac_write_voltage(requested_voltage);
+				}
 				HAL_Delay(1);
 				single_shot();
 			}
@@ -712,7 +717,7 @@ int main(void)
 				memset(msg, 0, sizeof(msg));
 				sprintf(msg, "uSMU version 1.0 ID:%d", revision);
 				strcat(msg, "\n");
-				CDC_Transmit_FS(msg, sizeof(msg));
+				CDC_Transmit_FS(msg, strlen(msg));
 
 			}
 
@@ -856,7 +861,7 @@ int main(void)
 				memset(msg, 0, sizeof(msg));
 				sprintf(msg, "%e", g);
 				strcat(msg, "\n");
-				CDC_Transmit_FS(msg, sizeof(msg));
+				CDC_Transmit_FS(msg, strlen(msg));
 
 			}
 			else if (manualCurDACPtr != NULL)
@@ -878,7 +883,7 @@ int main(void)
 			{
 				char msg[1024] = "Test string not found";
 				strcat(msg, "\n");
-				CDC_Transmit_FS(msg, sizeof(msg));
+				CDC_Transmit_FS(msg, strlen(msg));
 			}
 		}
 		/* USER CODE END WHILE */
