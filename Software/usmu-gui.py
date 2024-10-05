@@ -4,7 +4,7 @@ import sys
 from gui import mainwindow
 import argparse
 import logging
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s [%(module)s]: %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s [%(module)s]: %(message)s")
 
 # kill on Ctrl-C (useful for debugging)
 import signal

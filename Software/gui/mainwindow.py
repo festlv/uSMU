@@ -1,7 +1,11 @@
 import logging
+from unittest.mock import right
+
 from PyQt6 import QtWidgets, QtCore
+from PyQt6.QtWidgets import QSizePolicy
+
 from gui import smuworker
-from gui import measwidget, control
+from gui import measwidget, control, graph
 
 class MainWindow(QtWidgets.QMainWindow):
     log: logging.Logger
@@ -14,13 +18,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.smu_worker = smuworker.SMUWorker(port)
 
         w = QtWidgets.QWidget()
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
+        leftlayout = QtWidgets.QVBoxLayout()
         mw = measwidget.LiveMeasurementWidget()
         self.smu_worker.signals.vi_measurement_received.connect(mw.measurement_received)
-        layout.addWidget(mw)
-
+        leftlayout.addWidget(mw)
         cw = control.ControlWidget(self.smu_worker)
-        layout.addWidget(cw)
+        leftlayout.addWidget(cw)
+
+        rightlayout = QtWidgets.QHBoxLayout()
+        gw = graph.HistoryGraphWidget()
+        self.smu_worker.signals.vi_measurement_received.connect(gw.measurement_received)
+        rightlayout.addWidget(gw)
+
+        layout.addLayout(leftlayout)
+        layout.addLayout(rightlayout)
+        layout.setStretch(0, 10)
+        layout.setStretch(1, 50)
 
         w.setLayout(layout)
         self.setCentralWidget(w)

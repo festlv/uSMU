@@ -2,6 +2,8 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import QLabel, QLineEdit, QPushButton
+
+import usmu.usmudevice
 from gui import smuworker
 from gui.smuworker import SMUWorker
 
@@ -30,7 +32,9 @@ class ControlWidget(QtWidgets.QGroupBox):
     pb_disable: QPushButton
     def __init__(self, smuw:SMUWorker):
         super().__init__()
+        self.v_initialized = False
         self.smuw = smuw
+        smuw.signals.vi_measurement_received.connect(self.measurement_received)
         self.setTitle("Output control")
         l = QtWidgets.QFormLayout()
         self.volt_sp = ULineEdit("V")
@@ -53,8 +57,12 @@ class ControlWidget(QtWidgets.QGroupBox):
         self.pb_disable.clicked.connect(self.handle_disable)
         l.addRow(self.pb_disable, self.pb_enable)
 
-        self.setStyleSheet("font-family: mono;font-size: 16pt;")
         self.setLayout(l)
+
+    def measurement_received(self, m: usmu.usmudevice.VIMeasurement):
+        if not self.v_initialized:
+            self.volt_sp.line_edit.setText(str(m.voltage))
+            self.v_initialized = True
 
     def handle_set(self):
         volt = float(self.volt_sp.line_edit.text())
